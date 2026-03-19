@@ -88,7 +88,7 @@ export default function SignupPage() {
                 color: "teal",
               });
               setTransitionMessage("Opening your dashboard…");
-              await new Promise((r) => setTimeout(r, 2000));
+              await new Promise((r) => setTimeout(r, 1000));
               router.replace("/dashboard");
             } catch (e) {
               setTransitionMessage(null);
