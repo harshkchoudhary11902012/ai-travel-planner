@@ -25,10 +25,15 @@ app.use(
 			if (!origin) return callback(null, true);
 			if (!CORS_ORIGIN) return callback(null, true);
 
-			const allowed = CORS_ORIGIN.split(",")
-				.map((s) => s.trim())
-				.filter(Boolean);
-			if (allowed.includes(origin)) return callback(null, true);
+			const normalize = (v: string) => v.trim().replace(/\/+$/, "");
+
+			const allowed = CORS_ORIGIN.split(",").map(normalize).filter(Boolean);
+			const incoming = normalize(origin);
+
+			// Allow all (not recommended for prod).
+			if (allowed.includes("*")) return callback(null, true);
+
+			if (allowed.includes(incoming)) return callback(null, true);
 			return callback(new Error("CORS origin not allowed"), false);
 		},
 		credentials: true,
