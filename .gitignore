@@ -25,12 +25,16 @@ backend/dist/
 .next/
 out/
 build/
+next-env.d.ts
+.turbo/
 
 # Vercel
 .vercel/
 
 # TypeScript
 *.tsbuildinfo
+*.log
+.eslintcache
 
 # Coverage
 coverage/
