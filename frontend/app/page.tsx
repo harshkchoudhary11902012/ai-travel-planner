@@ -1,5 +1,5 @@
-import { LoginPageContent } from "@/components/Auth/LoginPageContent";
+import LoginPage from "@/components/Auth/login-page";
 
 export default function Home() {
-  return <LoginPageContent />;
+  return <LoginPage />;
 }

@@ -1,36 +1,47 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { ColorSchemeScript } from "@mantine/core";
+import { Poppins, Space_Grotesk } from "next/font/google";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
-import "./globals.css";
 import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const poppins = Poppins({
+	subsets: ["latin"],
+	variable: "--font-poppins",
+	weight: ["300", "400", "500", "600", "700"],
+	display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// Variable font — omit `weight` so Next loads the full axis (avoids missing glyphs).
+const spaceGrotesk = Space_Grotesk({
+	subsets: ["latin"],
+	variable: "--font-space-grotesk",
+	display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "AI Travel Planner",
-  description:
-    "Plan trips with AI-generated itineraries, budgets, and hotels—edit days, regenerate, and restore revisions.",
+	title: "AI Travel Planner",
+	description:
+		"Plan trips with AI-generated itineraries, budgets, and hotels—edit days, regenerate, and restore revisions.",
 };
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  );
+	return (
+		<html
+			lang="en"
+			className={`${poppins.variable} ${spaceGrotesk.variable}`}
+			suppressHydrationWarning
+		>
+			<head>
+				<ColorSchemeScript defaultColorScheme="light" />
+			</head>
+			<body className={poppins.className}>
+				<Providers>{children}</Providers>
+			</body>
+		</html>
+	);
 }

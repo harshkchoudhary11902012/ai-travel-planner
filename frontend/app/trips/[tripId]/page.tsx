@@ -18,7 +18,7 @@ import {
   Title,
 } from "@mantine/core";
 
-import RequireAuth from "@/components/Auth/RequireAuth";
+import RequireAuth from "@/components/RequireAuth";
 import DayPanel from "@/components/Trip/DayPanel";
 import RevisionPanel from "@/components/Trip/RevisionPanel";
 import type { Trip, TripRevision } from "@/lib/trips";

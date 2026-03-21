@@ -17,7 +17,7 @@ import {
 
 import { showNotification } from "@mantine/notifications";
 
-import RequireAuth from "@/components/Auth/RequireAuth";
+import RequireAuth from "@/components/RequireAuth";
 import { api } from "@/lib/api";
 import { logout } from "@/lib/auth";
 

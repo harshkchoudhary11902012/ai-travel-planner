@@ -17,7 +17,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 
-import RequireAuth from "@/components/Auth/RequireAuth";
+import RequireAuth from "@/components/RequireAuth";
 import { api } from "@/lib/api";
 import type { Trip } from "@/lib/trips";
 
