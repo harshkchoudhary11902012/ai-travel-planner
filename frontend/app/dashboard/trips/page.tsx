@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+	ActionIcon,
 	Alert,
 	Badge,
 	Button,
@@ -17,11 +18,14 @@ import {
 	Text,
 	Title,
 } from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
+import { IconEye, IconTrash } from "@tabler/icons-react";
 
 import { BaseApp } from "@/components/BaseApp/base-app";
 import RequireAuth from "@/components/Auth/RequireAuth";
 import type { Trip } from "@/lib/trips";
-import { listTrips } from "@/lib/trips";
+import { deleteTrip, listTrips } from "@/lib/trips";
 
 export default function MyTripsPage() {
 	return (
@@ -37,6 +41,7 @@ function MyTripsInner() {
 	const router = useRouter();
 	const [trips, setTrips] = useState<Trip[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [deletingId, setDeletingId] = useState<string | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -54,6 +59,42 @@ function MyTripsInner() {
 			cancelled = true;
 		};
 	}, []);
+
+	function confirmDeleteTrip(trip: Trip) {
+		modals.openConfirmModal({
+			title: "Delete trip permanently?",
+			children: (
+				<Text size="sm">
+					This removes <strong>{trip.destination}</strong> and its revision history. You cannot undo
+					this.
+				</Text>
+			),
+			labels: { confirm: "Delete", cancel: "Cancel" },
+			confirmProps: { color: "red" },
+			onConfirm: async () => {
+				setDeletingId(trip._id);
+				try {
+					await deleteTrip(trip._id);
+					setTrips((prev) => (prev ? prev.filter((t) => t._id !== trip._id) : prev));
+					showNotification({
+						title: "Trip deleted",
+						message: `${trip.destination} was removed.`,
+						color: "orange",
+						position: "top-center",
+					});
+				} catch (e) {
+					showNotification({
+						title: "Could not delete trip",
+						message: e instanceof Error ? e.message : "Request failed",
+						color: "red",
+						position: "top-center",
+					});
+				} finally {
+					setDeletingId(null);
+				}
+			},
+		});
+	}
 
 	if (trips === null) {
 		return (
@@ -101,7 +142,8 @@ function MyTripsInner() {
 								<Table.Th>Duration</Table.Th>
 								<Table.Th>Budget</Table.Th>
 								<Table.Th>Interests</Table.Th>
-								<Table.Th style={{ width: 120 }} />
+								<Table.Th>Status</Table.Th>
+								<Table.Th style={{ width: 120 }}>Actions</Table.Th>
 							</Table.Tr>
 						</Table.Thead>
 						<Table.Tbody>
@@ -122,14 +164,31 @@ function MyTripsInner() {
 										</Text>
 									</Table.Td>
 									<Table.Td>
-										<Button
-											component={Link}
-											href={`/trips/${trip._id}`}
-											variant="light"
-											size="xs"
-										>
+										<Badge variant="light" color="teal">
 											Open
-										</Button>
+										</Badge>
+									</Table.Td>
+									<Table.Td>
+										<Group gap={4} wrap="nowrap">
+											<ActionIcon
+												variant="subtle"
+												color="mainColor"
+												aria-label={`Open ${trip.destination}`}
+												onClick={() => router.push(`/trips/${trip._id}`)}
+											>
+												<IconEye size={18} stroke={1.5} />
+											</ActionIcon>
+											<ActionIcon
+												variant="subtle"
+												color="red"
+												aria-label={`Delete ${trip.destination}`}
+												loading={deletingId === trip._id}
+												disabled={deletingId !== null && deletingId !== trip._id}
+												onClick={() => confirmDeleteTrip(trip)}
+											>
+												<IconTrash size={18} stroke={1.5} />
+											</ActionIcon>
+										</Group>
 									</Table.Td>
 								</Table.Tr>
 							))}

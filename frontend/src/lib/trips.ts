@@ -52,6 +52,10 @@ export async function listTrips() {
   return api<Trip[]>("/api/trips", { method: "GET" });
 }
 
+export async function deleteTrip(tripId: string) {
+  await api<{ ok?: boolean }>(`/api/trips/${tripId}`, { method: "DELETE" });
+}
+
 export async function getTrip(tripId: string) {
   return api<Trip>(`/api/trips/${tripId}`, { method: "GET" });
 }

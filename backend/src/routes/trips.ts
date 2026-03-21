@@ -100,7 +100,9 @@ router.post("/", requireAuth, async (req: Request, res: Response) => {
     return res.status(201).json(trip);
   } catch (err) {
     console.error("Trip creation error:", err);
-    return res.status(500).json({ error: "Trip generation failed" });
+    const detail =
+      process.env.NODE_ENV !== "production" && err instanceof Error ? err.message : undefined;
+    return res.status(500).json({ error: "Trip generation failed", ...(detail ? { detail } : {}) });
   }
 });
 

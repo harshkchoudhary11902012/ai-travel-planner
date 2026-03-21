@@ -2,7 +2,7 @@ import { getToken } from "./token";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
-type ApiErrorPayload = { error?: string; message?: string };
+type ApiErrorPayload = { error?: string; message?: string; detail?: string };
 
 export async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
   const token = getToken();
@@ -20,7 +20,8 @@ export async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
   const payload = text ? (JSON.parse(text) as ApiErrorPayload) : ({} as ApiErrorPayload);
 
   if (!res.ok) {
-    const msg = payload.error || payload.message || `Request failed (${res.status})`;
+    const base = payload.error || payload.message || `Request failed (${res.status})`;
+    const msg = payload.detail ? `${base}: ${payload.detail}` : base;
     throw new Error(msg);
   }
 
