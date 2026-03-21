@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ColorSchemeScript } from "@mantine/core";
 import { Poppins, Space_Grotesk } from "next/font/google";
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 import { Providers } from "./providers";
 
@@ -12,7 +13,6 @@ const poppins = Poppins({
 	display: "swap",
 });
 
-// Variable font — omit `weight` so Next loads the full axis (avoids missing glyphs).
 const spaceGrotesk = Space_Grotesk({
 	subsets: ["latin"],
 	variable: "--font-space-grotesk",

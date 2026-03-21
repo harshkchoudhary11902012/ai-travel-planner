@@ -18,6 +18,7 @@ import {
 	Title,
 } from "@mantine/core";
 
+import { BaseApp } from "@/components/BaseApp/base-app";
 import RequireAuth from "@/components/Auth/RequireAuth";
 import DayPanel from "@/components/Trip/DayPanel";
 import RevisionPanel from "@/components/Trip/RevisionPanel";
@@ -30,7 +31,9 @@ export default function TripPage() {
 
 	return (
 		<RequireAuth>
-			<TripInner tripId={tripId} />
+			<BaseApp>
+				<TripInner tripId={tripId} />
+			</BaseApp>
 		</RequireAuth>
 	);
 }
@@ -106,7 +109,7 @@ function TripInner({ tripId }: { tripId: string }) {
 				<Group>
 					<Button
 						variant="subtle"
-						onClick={() => router.replace("/dashboard")}
+						onClick={() => router.replace("/dashboard/trips")}
 						disabled={saving}
 					>
 						Back

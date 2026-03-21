@@ -37,6 +37,8 @@ export type Trip = {
   itinerary: TripDay[];
   budget: TripBudget;
   hotels: TripHotel[];
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type TripRevision = {
@@ -45,6 +47,10 @@ export type TripRevision = {
   action: string;
   note: string;
 };
+
+export async function listTrips() {
+  return api<Trip[]>("/api/trips", { method: "GET" });
+}
 
 export async function getTrip(tripId: string) {
   return api<Trip>(`/api/trips/${tripId}`, { method: "GET" });

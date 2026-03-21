@@ -4,6 +4,13 @@ export type AuthenticatedUser = {
 	lastName?: string;
 };
 
+/** First name for greetings; falls back to a short label derived from email. */
+export function displayFirstName(user: AuthenticatedUser): string {
+	const fn = user.firstName?.trim();
+	if (fn) return fn;
+	return displayFirstNameFromEmail(user.email);
+}
+
 /** Full name when first/last exist; otherwise a friendly label from email. */
 export function displayFullName(user: AuthenticatedUser): string {
 	const fn = user.firstName?.trim() ?? "";

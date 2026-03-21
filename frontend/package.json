@@ -12,6 +12,7 @@
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@mantine/core": "^8.3.18",
+    "@mantine/dates": "^8.3.18",
     "@mantine/dropzone": "^8.3.18",
     "@mantine/form": "^8.3.18",
     "@mantine/hooks": "^8.3.18",
@@ -19,6 +20,7 @@
     "@mantine/notifications": "^8.3.18",
     "@mantine/spotlight": "^8.3.18",
     "@tabler/icons-react": "^3.40.0",
+    "dayjs": "^1.11.13",
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3"

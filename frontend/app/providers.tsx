@@ -3,12 +3,13 @@
 import type { ReactNode } from "react";
 import { CacheProvider } from "@emotion/react";
 import { MantineProvider } from "@mantine/core";
+import { DatesProvider } from "@mantine/dates";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import createCache from "@emotion/cache";
 
-import { ThemeToggle } from "@/theme/ThemeToggle";
-import theme from "@/theme/theme";
+import { UserProvider } from "@/context/user-context";
+import theme from "@/lib/theme";
 
 const cache = createCache({ key: "mantine", prepend: true });
 
@@ -16,11 +17,14 @@ export function Providers({ children }: { children: ReactNode }) {
 	return (
 		<CacheProvider value={cache}>
 			<MantineProvider theme={theme} defaultColorScheme="light">
-				<ModalsProvider>
-					<Notifications />
-					<ThemeToggle />
-					{children}
-				</ModalsProvider>
+				<DatesProvider settings={{ locale: "en", firstDayOfWeek: 0 }}>
+					<UserProvider>
+						<ModalsProvider>
+							<Notifications />
+							{children}
+						</ModalsProvider>
+					</UserProvider>
+				</DatesProvider>
 			</MantineProvider>
 		</CacheProvider>
 	);
