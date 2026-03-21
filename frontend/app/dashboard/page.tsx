@@ -15,11 +15,9 @@ import {
 	Center,
 } from "@mantine/core";
 
-import { showNotification } from "@mantine/notifications";
-
-import RequireAuth from "@/components/RequireAuth";
+import { BaseApp } from "@/components/BaseApp/base-app";
+import RequireAuth from "@/components/Auth/RequireAuth";
 import { api } from "@/lib/api";
-import { logout } from "@/lib/auth";
 
 type Trip = {
 	_id: string;
@@ -32,7 +30,9 @@ type Trip = {
 export default function DashboardPage() {
 	return (
 		<RequireAuth>
-			<DashboardInner />
+			<BaseApp>
+				<DashboardInner />
+			</BaseApp>
 		</RequireAuth>
 	);
 }
@@ -62,40 +62,17 @@ function DashboardInner() {
 
 	if (loading) {
 		return (
-			<Center style={{ minHeight: 220 }}>
+			<Center mih={220}>
 				<Loader />
 			</Center>
 		);
 	}
 
 	return (
-		<Container size={980} style={{ paddingTop: 28, paddingBottom: 40 }}>
-			<Group justify="space-between" align="center" mb="md">
-				<Title order={2}>Your trips</Title>
-				<Group>
-					<Button variant="subtle" onClick={() => router.push("/new")}>
-						New trip
-					</Button>
-					<Button
-						variant="outline"
-						color="red"
-						onClick={() => {
-							showNotification({
-								title: "Successfully logged out",
-								message: "See you next time.",
-								color: "orange",
-								position: "top-center",
-								autoClose: 5000,
-								withCloseButton: true,
-							});
-							logout();
-							router.replace("/");
-						}}
-					>
-						Log out
-					</Button>
-				</Group>
-			</Group>
+		<Container size={980} py={24}>
+			<Title order={2} mb="md">
+				Your trips
+			</Title>
 
 			{trips.length === 0 ? (
 				<Card withBorder p="xl">

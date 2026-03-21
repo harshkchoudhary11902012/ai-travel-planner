@@ -12,6 +12,8 @@ const router = express.Router();
 const signupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
+  firstName: z.string().trim().min(1, "First name is required"),
+  lastName: z.string().trim().min(1, "Last name is required"),
 });
 
 const loginSchema = z.object({
@@ -38,7 +40,12 @@ router.post("/signup", async (req: Request, res: Response) => {
     const existing = await User.findOne({ email });
     if (existing) return sendError(res, 409, "Email already registered");
 
-    const user = await User.create({ email, passwordHash });
+    const user = await User.create({
+      email,
+      passwordHash,
+      firstName: parsed.data.firstName.trim(),
+      lastName: parsed.data.lastName.trim(),
+    });
     const u = user.toObject();
     delete (u as Record<string, unknown>).passwordHash;
     return res.status(201).json({ user: u });

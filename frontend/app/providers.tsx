@@ -7,7 +7,7 @@ import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import createCache from "@emotion/cache";
 
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/theme/ThemeToggle";
 import theme from "@/theme/theme";
 
 const cache = createCache({ key: "mantine", prepend: true });

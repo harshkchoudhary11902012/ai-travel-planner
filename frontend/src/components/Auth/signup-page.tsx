@@ -64,7 +64,12 @@ export default function SignupPage() {
 						onSubmit={form.onSubmit(async (values) => {
 							setError(null);
 							try {
-								await signup({ email: values.email, password: values.password });
+								await signup({
+									email: values.email,
+									password: values.password,
+									firstName: values.firstName.trim(),
+									lastName: values.lastName.trim(),
+								});
 								await login({ email: values.email, password: values.password });
 								showNotification({
 									title: "Successfully signed in",
