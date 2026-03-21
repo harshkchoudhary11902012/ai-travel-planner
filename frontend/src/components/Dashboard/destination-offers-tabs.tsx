@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Card, Group, SimpleGrid, Stack, Tabs, Text, Title } from "@mantine/core";
 import { IconMapPin } from "@tabler/icons-react";
 
+import { formatCostInINR } from "@/lib/currency";
+
 export type DestinationOffer = {
 	id: string;
 	image: string;
@@ -37,7 +39,7 @@ function OfferCard({ item }: { item: DestinationOffer }) {
 					</Text>
 				</Group>
 				<Text size="sm" fw={700} c="mainColor">
-					${item.pricePerDay}/day
+					{formatCostInINR(item.pricePerDay)}/day
 				</Text>
 			</Stack>
 		</Card>

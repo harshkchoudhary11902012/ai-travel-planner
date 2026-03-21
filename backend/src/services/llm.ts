@@ -343,7 +343,7 @@ export async function generateTrip(input: {
 	const systemPrompt = [
 		"You are a senior travel planner and a strict JSON generator.",
 		"Return valid JSON only (no markdown, no code fences).",
-		"All numeric budget values are in USD.",
+		"All numeric budget values are in INR (Indian Rupees). Use realistic India-market trip estimates.",
 	].join(" ");
 
 	const userPrompt = [

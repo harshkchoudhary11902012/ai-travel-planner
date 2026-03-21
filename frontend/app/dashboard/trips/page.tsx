@@ -24,6 +24,7 @@ import { IconEye, IconTrash } from "@tabler/icons-react";
 
 import { BaseApp } from "@/components/BaseApp/base-app";
 import RequireAuth from "@/components/Auth/RequireAuth";
+import { budgetTypeBadgeColor } from "@/lib/budget-type";
 import type { Trip } from "@/lib/trips";
 import { deleteTrip, listTrips } from "@/lib/trips";
 
@@ -65,8 +66,8 @@ function MyTripsInner() {
 			title: "Delete trip permanently?",
 			children: (
 				<Text size="sm">
-					This removes <strong>{trip.destination}</strong> and its revision history. You cannot undo
-					this.
+					This removes <strong>{trip.destination}</strong> and its revision history. You
+					cannot undo this.
 				</Text>
 			),
 			labels: { confirm: "Delete", cancel: "Cancel" },
@@ -105,7 +106,7 @@ function MyTripsInner() {
 	}
 
 	return (
-		<Container size="lg">
+		<Container size={1440}>
 			<Group justify="space-between" align="flex-start" mb="lg">
 				<Stack gap={4}>
 					<Title order={2}>My trips</Title>
@@ -156,7 +157,12 @@ function MyTripsInner() {
 										<Text size="sm">{trip.days} days</Text>
 									</Table.Td>
 									<Table.Td>
-										<Badge variant="light">{trip.budgetType}</Badge>
+										<Badge
+											variant="light"
+											color={budgetTypeBadgeColor(trip.budgetType)}
+										>
+											{trip.budgetType}
+										</Badge>
 									</Table.Td>
 									<Table.Td>
 										<Text size="sm" lineClamp={2} maw={280}>
@@ -183,7 +189,9 @@ function MyTripsInner() {
 												color="red"
 												aria-label={`Delete ${trip.destination}`}
 												loading={deletingId === trip._id}
-												disabled={deletingId !== null && deletingId !== trip._id}
+												disabled={
+													deletingId !== null && deletingId !== trip._id
+												}
 												onClick={() => confirmDeleteTrip(trip)}
 											>
 												<IconTrash size={18} stroke={1.5} />

@@ -19,6 +19,7 @@ import {
 	Text,
 	ThemeIcon,
 	Title,
+	rem,
 } from "@mantine/core";
 import { Calendar } from "@mantine/dates";
 import {
@@ -35,6 +36,7 @@ import { BaseApp } from "@/components/BaseApp/base-app";
 import RequireAuth from "@/components/Auth/RequireAuth";
 import { DestinationOffersTabs } from "@/components/Dashboard/destination-offers-tabs";
 import { useUser } from "@/context/user-context";
+import { budgetTypeBadgeColor } from "@/lib/budget-type";
 import type { Trip } from "@/lib/trips";
 import { listTrips } from "@/lib/trips";
 import { displayFirstName } from "@/lib/user-display";
@@ -200,7 +202,14 @@ function DashboardInner() {
 										</Button>
 									</Paper>
 								) : (
-									<Paper withBorder radius="md" style={{ overflow: "auto" }}>
+									<Paper
+										withBorder
+										radius="md"
+										style={{
+											overflow: "auto",
+											maxHeight: rem(200),
+										}}
+									>
 										<Table verticalSpacing="xs" horizontalSpacing="sm">
 											<Table.Tbody>
 												{recent.map((t) => (
@@ -213,7 +222,11 @@ function DashboardInner() {
 																<Badge size="xs" variant="light">
 																	{t.days}d
 																</Badge>
-																<Badge size="xs" variant="outline">
+																<Badge
+																	size="xs"
+																	variant="light"
+																	color={budgetTypeBadgeColor(t.budgetType)}
+																>
 																	{t.budgetType}
 																</Badge>
 															</Group>

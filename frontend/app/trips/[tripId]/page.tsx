@@ -20,6 +20,8 @@ import {
 
 import { BaseApp } from "@/components/BaseApp/base-app";
 import RequireAuth from "@/components/Auth/RequireAuth";
+import { budgetTypeBadgeColor } from "@/lib/budget-type";
+import { formatCostInINR } from "@/lib/currency";
 import DayPanel from "@/components/Trip/DayPanel";
 import RevisionPanel from "@/components/Trip/RevisionPanel";
 import type { Trip, TripRevision } from "@/lib/trips";
@@ -97,13 +99,15 @@ function TripInner({ tripId }: { tripId: string }) {
 	}
 
 	return (
-		<Container size={1200} style={{ paddingTop: 24, paddingBottom: 60 }}>
+		<Container size={1440} style={{ paddingTop: 24, paddingBottom: 60 }}>
 			<Group justify="space-between" align="flex-start" mb="md">
 				<Stack gap={4}>
 					<Title order={2}>Trip: {trip.destination}</Title>
 					<Group gap="xs">
 						<Badge>{trip.days} day(s)</Badge>
-						<Badge variant="light">{trip.budgetType} budget</Badge>
+						<Badge variant="light" color={budgetTypeBadgeColor(trip.budgetType)}>
+							{trip.budgetType} budget
+						</Badge>
 					</Group>
 				</Stack>
 				<Group>
@@ -130,20 +134,20 @@ function TripInner({ tripId }: { tripId: string }) {
 							<Text fw={700}>Estimated budget</Text>
 							<SimpleGrid cols={2}>
 								<Text size="sm" color="dimmed">
-									Flights: ${trip.budget.flights}
+									Flights: {formatCostInINR(trip.budget.flights)}
 								</Text>
 								<Text size="sm" color="dimmed">
-									Accommodation: ${trip.budget.accommodation}
+									Accommodation: {formatCostInINR(trip.budget.accommodation)}
 								</Text>
 								<Text size="sm" color="dimmed">
-									Food: ${trip.budget.food}
+									Food: {formatCostInINR(trip.budget.food)}
 								</Text>
 								<Text size="sm" color="dimmed">
-									Activities: ${trip.budget.activities}
+									Activities: {formatCostInINR(trip.budget.activities)}
 								</Text>
 							</SimpleGrid>
 							<Text size="lg" fw={800}>
-								Total: ${trip.budget.total}
+								Total: {formatCostInINR(trip.budget.total)}
 							</Text>
 						</Stack>
 					</Card>
