@@ -21,7 +21,7 @@ import {
 import { BaseApp } from "@/components/BaseApp/base-app";
 import RequireAuth from "@/components/Auth/RequireAuth";
 import { budgetTypeBadgeColor } from "@/lib/budget-type";
-import { formatCostInINR } from "@/lib/currency";
+import { formatINR } from "@/lib/currency";
 import DayPanel from "@/components/Trip/DayPanel";
 import RevisionPanel from "@/components/Trip/RevisionPanel";
 import type { Trip, TripRevision } from "@/lib/trips";
@@ -134,20 +134,20 @@ function TripInner({ tripId }: { tripId: string }) {
 							<Text fw={700}>Estimated budget</Text>
 							<SimpleGrid cols={2}>
 								<Text size="sm" color="dimmed">
-									Flights: {formatCostInINR(trip.budget.flights)}
+									Flights: {formatINR(trip.budget.flights)}
 								</Text>
 								<Text size="sm" color="dimmed">
-									Accommodation: {formatCostInINR(trip.budget.accommodation)}
+									Accommodation: {formatINR(trip.budget.accommodation)}
 								</Text>
 								<Text size="sm" color="dimmed">
-									Food: {formatCostInINR(trip.budget.food)}
+									Food: {formatINR(trip.budget.food)}
 								</Text>
 								<Text size="sm" color="dimmed">
-									Activities: {formatCostInINR(trip.budget.activities)}
+									Activities: {formatINR(trip.budget.activities)}
 								</Text>
 							</SimpleGrid>
 							<Text size="lg" fw={800}>
-								Total: {formatCostInINR(trip.budget.total)}
+								Total: {formatINR(trip.budget.total)}
 							</Text>
 						</Stack>
 					</Card>

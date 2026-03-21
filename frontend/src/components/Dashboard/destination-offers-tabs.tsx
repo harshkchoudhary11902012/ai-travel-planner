@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Card, Group, SimpleGrid, Stack, Tabs, Text, Title } from "@mantine/core";
 import { IconMapPin } from "@tabler/icons-react";
 
-import { formatCostInINR } from "@/lib/currency";
+import { formatINR } from "@/lib/currency";
 
 export type DestinationOffer = {
 	id: string;
@@ -39,7 +39,7 @@ function OfferCard({ item }: { item: DestinationOffer }) {
 					</Text>
 				</Group>
 				<Text size="sm" fw={700} c="mainColor">
-					{formatCostInINR(item.pricePerDay)}/day
+					{formatINR(item.pricePerDay)}/day
 				</Text>
 			</Stack>
 		</Card>
@@ -62,28 +62,28 @@ const MOST_POPULAR: DestinationOffer[] = [
 		image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
 		destination: "Paris",
 		country: "France",
-		pricePerDay: 420,
+		pricePerDay: 14500,
 	},
 	{
 		id: "p2",
 		image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&q=80",
 		destination: "Tokyo",
 		country: "Japan",
-		pricePerDay: 380,
+		pricePerDay: 13200,
 	},
 	{
 		id: "p3",
 		image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800&q=80",
 		destination: "New York",
 		country: "United States",
-		pricePerDay: 450,
+		pricePerDay: 15800,
 	},
 	{
 		id: "p4",
 		image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80",
 		destination: "Dubai",
 		country: "United Arab Emirates",
-		pricePerDay: 400,
+		pricePerDay: 13900,
 	},
 ];
 
@@ -93,28 +93,28 @@ const SPECIAL_OFFERS: DestinationOffer[] = [
 		image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80",
 		destination: "Bali",
 		country: "Indonesia",
-		pricePerDay: 185,
+		pricePerDay: 7200,
 	},
 	{
 		id: "s2",
 		image: "https://images.unsplash.com/photo-1585208798174-6cedd86e019a?w=800&q=80",
 		destination: "Lisbon",
 		country: "Portugal",
-		pricePerDay: 220,
+		pricePerDay: 8400,
 	},
 	{
 		id: "s3",
 		image: "https://images.unsplash.com/photo-1541849546-216549ae216d?w=800&q=80",
 		destination: "Prague",
 		country: "Czech Republic",
-		pricePerDay: 195,
+		pricePerDay: 7800,
 	},
 	{
 		id: "s4",
 		image: "https://images.unsplash.com/photo-1557750255-c76072a7aad1?w=800&q=80",
 		destination: "Hanoi",
 		country: "Vietnam",
-		pricePerDay: 165,
+		pricePerDay: 6200,
 	},
 ];
 
@@ -124,14 +124,14 @@ const NEAR_ME: DestinationOffer[] = [
 		image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&q=80",
 		destination: "Big Sur",
 		country: "United States",
-		pricePerDay: 340,
+		pricePerDay: 11200,
 	},
 	{
 		id: "n2",
 		image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
 		destination: "Lake Tahoe",
 		country: "United States",
-		pricePerDay: 290,
+		pricePerDay: 9800,
 	},
 	{
 		id: "n3",
@@ -139,14 +139,14 @@ const NEAR_ME: DestinationOffer[] = [
 			"https://images.unsplash.com/photo-1551650918-329737f129cd?w=800&q=80&auto=format&fit=crop",
 		destination: "Joshua Tree",
 		country: "United States",
-		pricePerDay: 285,
+		pricePerDay: 9600,
 	},
 	{
 		id: "n4",
 		image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=800&q=80",
 		destination: "Santa Barbara",
 		country: "United States",
-		pricePerDay: 360,
+		pricePerDay: 11800,
 	},
 ];
 
