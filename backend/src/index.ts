@@ -6,6 +6,7 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 
 import authRouter from "./routes/auth";
+import planRouter from "./routes/plan";
 import tripsRouter from "./routes/trips";
 
 const app = express();
@@ -47,7 +48,7 @@ app.get("/", (_req, res) => {
 		ok: true,
 		service: "ai-travel-planner-api",
 		health: "/api/health",
-		hint: "The API lives under /api (e.g. /api/health, /api/auth, /api/trips).",
+		hint: "The API lives under /api (e.g. /api/health, /api/auth, /api/plan, /api/trips).",
 	});
 });
 
@@ -60,6 +61,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/plan", planRouter);
 app.use("/api/trips", tripsRouter);
 
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));

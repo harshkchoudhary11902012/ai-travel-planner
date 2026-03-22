@@ -35,10 +35,13 @@ const primaryModel = (
 	process.env.OPENAI_MODEL || (isGeminiPrimary ? "gemini-2.5-flash" : "gpt-4o-mini")
 ).trim();
 
-const max429Retries = Math.min(
-	10,
-	Math.max(0, Number.parseInt(process.env.LLM_429_RETRIES || "2", 10) || 2),
+/** 429 responses per model before moving to the next model (default 2). */
+const max429AttemptsPerModel = Math.min(
+	5,
+	Math.max(1, Number.parseInt(process.env.LLM_429_ATTEMPTS_PER_MODEL || "2", 10) || 2),
 );
+
+let lastSuccessfulModel: string | null = null;
 
 function fallbackModelList(): string[] {
 	// OpenAI-compat endpoint: 1.5 IDs often 404; use 2.5 / 3.x from https://ai.google.dev/gemini-api/docs/openai
@@ -60,6 +63,12 @@ function fallbackModelList(): string[] {
 	return ordered;
 }
 
+/** Prefer the last model that completed a request so we do not reset to a rate-limited primary every call. */
+function prioritizeLastSuccess(candidates: string[]): string[] {
+	if (!lastSuccessfulModel || !candidates.includes(lastSuccessfulModel)) return candidates;
+	return [lastSuccessfulModel, ...candidates.filter((m) => m !== lastSuccessfulModel)];
+}
+
 type TryCreateResult =
 	| { ok: true; completion: OpenAI.Chat.ChatCompletion }
 	| { ok: false; lastError: unknown; exhausted404: boolean };
@@ -77,7 +86,7 @@ async function createChatWith429Retries(
 ): Promise<OpenAI.Chat.ChatCompletion> {
 	let lastErr: unknown;
 
-	for (let attempt = 0; attempt <= max429Retries; attempt++) {
+	for (let attempt = 0; attempt < max429AttemptsPerModel; attempt++) {
 		try {
 			return await client.chat.completions.create({
 				model,
@@ -88,19 +97,18 @@ async function createChatWith429Retries(
 			lastErr = err;
 			const is429 = err instanceof APIError && err.status === 429;
 			if (!is429) throw err;
-			if (attempt >= max429Retries) throw err;
+			if (attempt >= max429AttemptsPerModel - 1) throw err;
 
 			const header =
 				err instanceof APIError && err.headers ? err.headers.get("retry-after") : null;
 			const retryAfterSec = header ? Number.parseFloat(header) : Number.NaN;
-			const backoffMs = Math.min(90_000, 2000 * 2 ** attempt);
 			const waitMs =
 				Number.isFinite(retryAfterSec) && retryAfterSec >= 0
-					? Math.min(120_000, Math.max(1500, retryAfterSec * 1000))
-					: backoffMs;
+					? Math.min(5000, Math.max(300, retryAfterSec * 1000))
+					: Math.min(2000, 800 * (attempt + 1));
 
 			console.warn(
-				`${logLabel} Model "${model}" rate limited (429). Waiting ${Math.round(waitMs / 1000)}s (retry ${attempt + 1}/${max429Retries})…`,
+				`${logLabel} Model "${model}" rate limited (429). Waiting ${Math.round(waitMs / 1000)}s (same-model attempt ${attempt + 1}/${max429AttemptsPerModel})…`,
 			);
 			await sleep(waitMs);
 		}
@@ -128,6 +136,7 @@ async function tryCreateWithClient(
 				temperature,
 				logLabel,
 			);
+			lastSuccessfulModel = m;
 			if (i > 0) {
 				console.warn(`${logLabel} Succeeded with model "${m}".`);
 			}
@@ -168,7 +177,7 @@ async function chatCompletionCreate(
 ): Promise<OpenAI.Chat.ChatCompletion> {
 	const primary = await tryCreateWithClient(
 		openai,
-		fallbackModelList(),
+		prioritizeLastSuccess(fallbackModelList()),
 		messages,
 		temperature,
 		"[LLM]",
@@ -200,7 +209,7 @@ async function chatCompletionCreate(
 			.split(",")
 			.map((s) => s.trim())
 			.filter(Boolean);
-		const gemModels = [gemPrimary, ...gemExtras.filter((x) => x !== gemPrimary)];
+		const gemModels = prioritizeLastSuccess([gemPrimary, ...gemExtras.filter((x) => x !== gemPrimary)]);
 
 		const secondary = await tryCreateWithClient(
 			gemClient,
@@ -421,4 +430,185 @@ export async function regenerateDay(input: {
 		userPrompt,
 		retries: 2,
 	});
+}
+
+const PlanChatResponseSchema = z.object({
+	message: z.string().min(1),
+	suggestions: z.union([
+		z.null(),
+		z
+			.array(
+				z.object({
+					label: z.string().min(1),
+					value: z.string().min(1),
+				}),
+			)
+			.length(3),
+	]),
+});
+
+export const PLAN_CHAT_PHASES = [
+	"welcome_intro",
+	"new_trip_departure_intro",
+	"new_trip_after_departure",
+	"new_trip_after_destination",
+	"new_trip_after_companion",
+	"new_trip_after_budget",
+	"new_trip_invalid_departure",
+	"new_trip_invalid_destination",
+	"new_trip_invalid_days",
+	"inspire_prompt_intro",
+	"inspire_after_user_prompt",
+	"inspire_after_destination",
+	"inspire_after_budget",
+	"inspire_invalid_prompt",
+	"hidden_prompt_intro",
+	"hidden_after_user_prompt",
+	"hidden_after_destination",
+	"hidden_after_budget",
+	"hidden_invalid_prompt",
+	"adventure_prompt_intro",
+	"adventure_after_user_prompt",
+	"adventure_after_destination",
+	"adventure_after_budget",
+	"adventure_invalid_prompt",
+	"trip_generation_start",
+] as const;
+
+export type PlanChatPhase = (typeof PLAN_CHAT_PHASES)[number];
+
+const PHASES_NEED_SUGGESTIONS = new Set<PlanChatPhase>([
+	"inspire_after_user_prompt",
+	"hidden_after_user_prompt",
+	"adventure_after_user_prompt",
+]);
+
+const PHASE_INSTRUCTIONS: Record<PlanChatPhase, string> = {
+	welcome_intro:
+		"Greet the user in 2–3 short sentences. Invite them to use the four options below or type freely. Warm, practical, no markdown.",
+	new_trip_departure_intro:
+		"They chose Create New Trip. Ask where they are departing from (city, region, or airport). One short paragraph.",
+	new_trip_after_departure:
+		"Acknowledge their departure point from context. Ask where they want to go next (destination city or country).",
+	new_trip_after_destination:
+		"They gave a destination. Ask who they are traveling with: Solo, Couple, Family, or Friends—mention they can tap cards or type.",
+	new_trip_after_companion:
+		"Acknowledge their travel group from context. Ask them to choose a budget style: Economy, Balanced, or Premium (cards or words).",
+	new_trip_after_budget:
+		"Acknowledge their budget tier from context. Ask how many days the trip should be (1–60), mention quick picks or typing.",
+	new_trip_invalid_departure:
+		"Their departure answer was too vague or missing. Politely ask again for a real departure place (at least two characters).",
+	new_trip_invalid_destination:
+		"Their destination was unclear. Ask again for a city, region, or country.",
+	new_trip_invalid_days:
+		"They did not give a valid trip length. Ask for a number of days between 1 and 60 (examples: 5, two weeks).",
+	inspire_prompt_intro:
+		"They want inspiration. Ask what they are craving—climate, vibe, max travel time, or a region they are curious about.",
+	inspire_after_user_prompt:
+		"Based on their message, propose exactly three diverse destination ideas as next-step options. In message: briefly reflect their input and tease the three ideas. suggestions must have 3 items: label is a catchy short line; value is a concrete region/country/city string suitable for an itinerary title.",
+	inspire_after_destination:
+		"Acknowledge their chosen destination from context. Ask what budget style to plan for (Economy, Balanced, Premium).",
+	inspire_after_budget:
+		"Acknowledge budget from context. Ask how many days they have for the trip.",
+	inspire_invalid_prompt:
+		"Their reply was too short. Ask for a bit more—climate, vibe, budget, or region—to suggest places.",
+	hidden_prompt_intro:
+		"They want hidden gems. Ask which region or country to explore, or the atmosphere they want (quiet villages, nature, food).",
+	hidden_after_user_prompt:
+		"From their message, propose exactly three lesser-known or quieter destinations. Message: reflect their vibe briefly. suggestions: 3 items with label + value (specific place/region for planning).",
+	hidden_after_destination:
+		"Acknowledge destination from context. Ask for budget style for stays and meals.",
+	hidden_after_budget:
+		"Acknowledge budget. Ask how many days they will be away.",
+	hidden_invalid_prompt:
+		"Ask again for a region, country, or the kind of hidden-gem experience they want.",
+	adventure_prompt_intro:
+		"They want adventure. Ask what fits—trekking, diving, road trip, wildlife—or a region in mind.",
+	adventure_after_user_prompt:
+		"From their message, propose exactly three strong adventure destinations. Message: brief encouragement. suggestions: 3 items label + value (region/country suitable for an adventure itinerary).",
+	adventure_after_destination:
+		"Acknowledge destination from context. Ask their budget tier for this adventure.",
+	adventure_after_budget:
+		"Acknowledge budget. Ask how many days they can spend.",
+	adventure_invalid_prompt:
+		"Ask for more detail on adventure style, activity, or region.",
+	trip_generation_start:
+		"They are about to generate a full itinerary. Give one or two short sentences of encouragement that you are building their plan. Use destination, days, budgetType, flowKind, and interestsSummary from context when helpful. suggestions must be null.",
+};
+
+function buildPlanChatUserPrompt(input: {
+	phase: PlanChatPhase;
+	userMessage?: string;
+	context?: Record<string, string>;
+}): string {
+	const instr = PHASE_INSTRUCTIONS[input.phase];
+	const lines = [
+		`Phase: ${input.phase}`,
+		`What to write: ${instr}`,
+		`Context JSON: ${JSON.stringify(input.context ?? {})}`,
+	];
+	if (input.userMessage !== undefined && input.userMessage !== "") {
+		lines.push(`Latest user message: ${input.userMessage}`);
+	}
+	lines.push(
+		'Return ONLY JSON: {"message":"...","suggestions":null} OR if this phase requires three destination picks, {"message":"...","suggestions":[{"label":"...","value":"..."},...3 items]}. No markdown, no code fences.',
+	);
+	return lines.join("\n\n");
+}
+
+export async function planAssistantResponse(input: {
+	phase: PlanChatPhase;
+	userMessage?: string;
+	context?: Record<string, string>;
+}): Promise<{ message: string; suggestions: Array<{ label: string; value: string }> | null }> {
+	if (!PHASE_INSTRUCTIONS[input.phase]) {
+		throw new Error(`Unknown phase: ${input.phase}`);
+	}
+
+	const wantsSuggestions = PHASES_NEED_SUGGESTIONS.has(input.phase);
+	const systemPrompt = [
+		"You are a warm, concise travel planning assistant for an app that builds day-by-day itineraries (budgets in Indian Rupees).",
+		"Always return valid JSON only (no markdown, no code fences).",
+		'The JSON must have keys "message" (plain text, no markdown) and "suggestions".',
+		'Set "suggestions" to null unless the phase requires exactly three {label, value} destination options.',
+		"Labels are shown as buttons; values are passed to the itinerary generator as the destination string.",
+	].join(" ");
+
+	const userPrompt = buildPlanChatUserPrompt(input);
+
+	let lastError: unknown;
+	let correction = "";
+
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			const completion = await chatCompletionCreate(
+				[
+					{ role: "system", content: systemPrompt },
+					{ role: "user", content: userPrompt + correction },
+				],
+				0.55,
+			);
+			const raw = completion.choices[0]?.message?.content || "";
+			const json = JSON.parse(extractJson(raw)) as unknown;
+			const parsed = PlanChatResponseSchema.parse(json);
+
+			if (wantsSuggestions) {
+				if (!parsed.suggestions || parsed.suggestions.length !== 3) {
+					throw new Error("Expected exactly three suggestions");
+				}
+				return { message: parsed.message, suggestions: parsed.suggestions };
+			}
+
+			return { message: parsed.message, suggestions: null };
+		} catch (err) {
+			lastError = err;
+			correction =
+				"\n\nYour previous output was invalid. Return ONLY valid JSON. " +
+				(wantsSuggestions
+					? 'Include "suggestions" as an array of exactly 3 objects with label and value.'
+					: 'Set "suggestions" to null.');
+		}
+	}
+
+	throw lastError instanceof Error ? lastError : new Error("Plan chat failed");
 }
