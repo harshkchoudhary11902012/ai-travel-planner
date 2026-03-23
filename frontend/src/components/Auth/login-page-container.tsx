@@ -64,20 +64,38 @@ export function LoginPageContainer({ children, slides = DEFAULT_SLIDES }: LoginP
 	const slide = safeSlides[active]!;
 
 	return (
-		<Box p={50} h={"100dvh"} display="flex">
+		<Box
+			display="flex"
+			mih="100dvh"
+			p={{ base: 12, xs: 16, sm: 24, md: 40, lg: 50 }}
+			style={{ alignItems: "stretch" }}
+		>
 			<Grid
 				maw={1280}
 				mx="auto"
+				miw={0}
 				w="100%"
+				align="stretch"
 				styles={{
 					inner: {
 						height: "100%",
+						"@media (max-width: 61.9375em)": {
+							height: "auto",
+						},
 					},
 				}}
 			>
 				<Grid.Col span={{ base: 12, md: 6 }} order={{ base: 2, md: 1 }}>
-					<Paper p="xl" radius="xl" shadow="md" withBorder h="100%">
-						<Group justify="space-between" wrap="wrap">
+					<Paper
+						p={{ base: "md", sm: "lg", md: "xl" }}
+						radius="xl"
+						shadow="md"
+						withBorder
+						miw={0}
+						w="100%"
+						h={{ base: "auto", md: "100%" }}
+					>
+						<Group justify="space-between" wrap="wrap" gap="sm">
 							<Group wrap="nowrap">
 								<Box
 									w={40}
@@ -130,7 +148,12 @@ export function LoginPageContainer({ children, slides = DEFAULT_SLIDES }: LoginP
 				</Grid.Col>
 
 				<Grid.Col span={{ base: 12, md: 6 }} order={{ base: 1, md: 2 }}>
-					<Paper radius="xl" h="100%" pos="relative" style={{ overflow: "hidden" }}>
+					<Paper
+						radius="xl"
+						h={{ base: 240, sm: 280, md: "100%" }}
+						pos="relative"
+						style={{ overflow: "hidden" }}
+					>
 						<Image src={slide.src} alt="" fill />
 						<Box
 							style={{
@@ -142,12 +165,19 @@ export function LoginPageContainer({ children, slides = DEFAULT_SLIDES }: LoginP
 								pointerEvents: "none",
 							}}
 						/>
-						<Box p={40} pos="absolute" left={0} bottom={0} style={{ zIndex: 2 }}>
-							<Title order={2} c="white">
+						<Box
+							p={{ base: 16, sm: 24, md: 40 }}
+							pr={{ base: 48, md: 40 }}
+							pos="absolute"
+							left={0}
+							bottom={0}
+							style={{ zIndex: 2 }}
+						>
+							<Title order={2} c="white" lineClamp={3} fz={{ base: "h4", sm: "h3" }}>
 								{slide.title}
 							</Title>
 							{slide.description ? (
-								<Text c="white" mt="sm">
+								<Text c="white" mt="sm" size="sm" lineClamp={2} fz={{ base: "xs", sm: "sm" }}>
 									{slide.description}
 								</Text>
 							) : null}

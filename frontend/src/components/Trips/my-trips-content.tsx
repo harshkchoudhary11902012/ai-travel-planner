@@ -16,6 +16,7 @@ import {
 	Text,
 	Title,
 } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { IconEye, IconTrash } from "@tabler/icons-react";
 
 import { useMyTrips } from "@/features/trips";
@@ -23,6 +24,9 @@ import { budgetTypeBadgeColor } from "@/lib/budget-type";
 
 export function MyTripsContent() {
 	const { trips, error, deletingId, confirmDeleteTrip } = useMyTrips();
+	const isWide = useMediaQuery("(min-width: 62em)", false, {
+		getInitialValueInEffect: true,
+	});
 
 	if (trips === null) {
 		return (
@@ -33,15 +37,15 @@ export function MyTripsContent() {
 	}
 
 	return (
-		<Container size={1440}>
-			<Group justify="space-between" align="flex-start" mb="lg">
-				<Stack gap={4}>
+		<Container size={1440} px={{ base: "xs", sm: "md" }}>
+			<Group justify="space-between" align="flex-start" wrap="wrap" gap="sm" mb="lg">
+				<Stack gap={4} maw={{ base: "100%", sm: 560 }} miw={0} style={{ flex: "1 1 240px" }}>
 					<Title order={2}>My trips</Title>
 					<Text size="sm" c="dimmed">
 						Open a trip to view AI itinerary, budget breakdown, hotel ideas, and edits.
 					</Text>
 				</Stack>
-				<Button component={Link} href="/dashboard/plan">
+				<Button component={Link} href="/dashboard/plan" w={{ base: "100%", sm: "auto" }}>
 					Plan new trip
 				</Button>
 			</Group>
@@ -63,9 +67,9 @@ export function MyTripsContent() {
 						</Button>
 					</Stack>
 				</Paper>
-			) : (
+			) : isWide ? (
 				<Paper withBorder radius="md" style={{ overflow: "auto" }}>
-					<Table striped highlightOnHover verticalSpacing="sm">
+					<Table striped highlightOnHover verticalSpacing="sm" layout="fixed" miw={720}>
 						<Table.Thead>
 							<Table.Tr>
 								<Table.Th>Destination</Table.Th>
@@ -128,6 +132,66 @@ export function MyTripsContent() {
 						</Table.Tbody>
 					</Table>
 				</Paper>
+			) : (
+				<Stack gap="md">
+					{trips.map((trip) => (
+						<Paper key={trip._id} withBorder p="md" radius="md">
+							<Stack gap="sm">
+								<Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
+									<Stack gap={4} miw={0} style={{ flex: 1 }}>
+										<Text fw={700}>{trip.destination}</Text>
+										<Group gap="xs" wrap="wrap">
+											<Text size="sm" c="dimmed">
+												{trip.days} days
+											</Text>
+											<Badge variant="light" color={budgetTypeBadgeColor(trip.budgetType)}>
+												{trip.budgetType}
+											</Badge>
+											<Badge variant="light" color="teal">
+												Open
+											</Badge>
+										</Group>
+									</Stack>
+									<Group gap={4} wrap="nowrap">
+										<ActionIcon
+											component={Link}
+											href={`/trips/${trip._id}`}
+											variant="subtle"
+											color="mainColor"
+											size="lg"
+											aria-label={`Open ${trip.destination}`}
+										>
+											<IconEye size={20} stroke={1.5} />
+										</ActionIcon>
+										<ActionIcon
+											variant="subtle"
+											color="red"
+											size="lg"
+											aria-label={`Delete ${trip.destination}`}
+											loading={deletingId === trip._id}
+											disabled={deletingId !== null && deletingId !== trip._id}
+											onClick={() => confirmDeleteTrip(trip)}
+										>
+											<IconTrash size={20} stroke={1.5} />
+										</ActionIcon>
+									</Group>
+								</Group>
+								{(trip.interests || []).length > 0 ? (
+									<Text size="sm" c="dimmed">
+										{(trip.interests || []).join(", ")}
+									</Text>
+								) : (
+									<Text size="sm" c="dimmed">
+										—
+									</Text>
+								)}
+								<Button component={Link} href={`/trips/${trip._id}`} variant="light" fullWidth>
+									View trip
+								</Button>
+							</Stack>
+						</Paper>
+					))}
+				</Stack>
 			)}
 		</Container>
 	);

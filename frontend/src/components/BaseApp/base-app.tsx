@@ -26,7 +26,7 @@ export function BaseApp({ children }: BaseAppProps) {
 				breakpoint: "sm",
 				collapsed: { mobile: !mobileNavOpened, desktop: desktopNavCollapsed },
 			}}
-			padding={24}
+			padding={{ base: 12, sm: 16, md: 24 }}
 			layout="alt"
 		>
 			<AppShell.Header>

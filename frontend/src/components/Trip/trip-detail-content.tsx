@@ -25,8 +25,16 @@ import { formatINR } from "@/lib/currency";
 
 export function TripDetailContent({ tripId }: { tripId: string }) {
 	const router = useRouter();
-	const { loading, saving, error, trip, revisions, revisionsLoading, orderedDays, handleMutation } =
-		useTripDetail(tripId);
+	const {
+		loading,
+		saving,
+		error,
+		trip,
+		revisions,
+		revisionsLoading,
+		orderedDays,
+		handleMutation,
+	} = useTripDetail(tripId);
 
 	if (loading || !trip) {
 		return (
@@ -37,26 +45,32 @@ export function TripDetailContent({ tripId }: { tripId: string }) {
 	}
 
 	return (
-		<Container size={1440} style={{ paddingTop: 24, paddingBottom: 60 }}>
-			<Group justify="space-between" align="flex-start" mb="md">
-				<Stack gap={4}>
-					<Title order={2}>Trip: {trip.destination}</Title>
-					<Group gap="xs">
+		<Container
+			size={1440}
+			px={{ base: "xs", sm: "md" }}
+			py={{ base: 16, sm: 24 }}
+			style={{ paddingBottom: 60 }}
+		>
+			<Group justify="space-between" align="flex-start" wrap="wrap" gap="sm" mb="md">
+				<Stack gap={4} miw={0} style={{ flex: "1 1 min(100%, 320px)" }}>
+					<Title order={2} lineClamp={3}>
+						Trip: {trip.destination}
+					</Title>
+					<Group gap="xs" wrap="wrap">
 						<Badge>{trip.days} day(s)</Badge>
 						<Badge variant="light" color={budgetTypeBadgeColor(trip.budgetType)}>
 							{trip.budgetType} budget
 						</Badge>
 					</Group>
 				</Stack>
-				<Group>
-					<Button
-						variant="subtle"
-						onClick={() => router.replace("/dashboard/trips")}
-						disabled={saving}
-					>
-						Back
-					</Button>
-				</Group>
+				<Button
+					variant="light"
+					w={{ base: "100%", sm: "auto" }}
+					onClick={() => router.replace("/dashboard/trips")}
+					disabled={saving}
+				>
+					Back
+				</Button>
 			</Group>
 
 			{error ? (
@@ -65,12 +79,15 @@ export function TripDetailContent({ tripId }: { tripId: string }) {
 				</Alert>
 			) : null}
 
-			<Grid gutter="xl" align="start">
-				<Grid.Col span={8}>
-					<Card withBorder p="md" radius="md" mb="md">
+			<Grid gutter={{ base: "md", md: "xl" }} align="start">
+				<Grid.Col span={{ base: 12, lg: 8 }}>
+					<Card withBorder p={{ base: "sm", sm: "md" }} radius="md" mb="md">
 						<Stack gap="xs">
 							<Text fw={700}>Estimated budget</Text>
-							<SimpleGrid cols={2}>
+							<SimpleGrid
+								cols={{ base: 1, sm: 2 }}
+								spacing={{ base: "xs", sm: "md" }}
+							>
 								<Text size="sm" color="dimmed">
 									Flights: {formatINR(trip.budget.flights)}
 								</Text>
@@ -90,12 +107,12 @@ export function TripDetailContent({ tripId }: { tripId: string }) {
 						</Stack>
 					</Card>
 
-					<Card withBorder p="md" radius="md" mb="md">
+					<Card withBorder p={{ base: "sm", sm: "md" }} radius="md" mb="md">
 						<Stack gap="xs">
 							<Text fw={700}>Recommended hotels</Text>
-							<Grid gutter={8}>
+							<Grid gutter={{ base: "xs", sm: 8 }}>
 								{trip.hotels.map((h, idx) => (
-									<Grid.Col span={6} key={`${h.name}-${idx}`}>
+									<Grid.Col span={{ base: 12, sm: 6 }} key={`${h.name}-${idx}`}>
 										<Card shadow="none" padding="sm" radius="md" withBorder>
 											<Stack gap={2}>
 												<Text fw={700}>{h.name}</Text>
@@ -105,7 +122,9 @@ export function TripDetailContent({ tripId }: { tripId: string }) {
 													</Text>
 												) : null}
 												{typeof h.rating === "number" ? (
-													<Text size="sm">Rating: {h.rating.toFixed(1)}/5</Text>
+													<Text size="sm">
+														Rating: {h.rating.toFixed(1)}/5
+													</Text>
 												) : (
 													<Text size="sm" color="dimmed">
 														Rating: N/A
@@ -137,7 +156,7 @@ export function TripDetailContent({ tripId }: { tripId: string }) {
 					</Stack>
 				</Grid.Col>
 
-				<Grid.Col span={4}>
+				<Grid.Col span={{ base: 12, lg: 4 }}>
 					<RevisionPanel
 						tripId={trip._id}
 						revisions={revisions}

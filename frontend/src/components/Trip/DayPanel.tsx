@@ -85,7 +85,7 @@ export default function DayPanel({
 		<Accordion chevronPosition="left" variant="contained" defaultValue={`day-${day.dayNumber}`}>
 			<Accordion.Item value={`day-${day.dayNumber}`} key={day.dayNumber}>
 				<Accordion.Control>
-					<Group gap="sm">
+					<Group gap="sm" wrap="wrap">
 						<Text fw={700}>Day {day.dayNumber}</Text>
 						<Badge variant="light">{day.activities.length} activities</Badge>
 						<Badge variant="light" color={budgetTypeBadgeColor(budgetType)}>
@@ -110,8 +110,8 @@ export default function DayPanel({
 										padding: 12,
 									}}
 								>
-									<Group justify="space-between" align="flex-start">
-										<Stack gap={2}>
+									<Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+										<Stack gap={2} miw={0} style={{ flex: "1 1 200px" }}>
 											<Text fw={600}>{a.title}</Text>
 											{a.notes ? (
 												<Text size="sm" color="dimmed" lineClamp={3}>
@@ -135,7 +135,27 @@ export default function DayPanel({
 							))}
 						</Stack>
 
-						<Group grow gap="xs" align="flex-end" mt="sm">
+						<Stack gap="xs" mt="sm" hiddenFrom="sm">
+							<TextInput
+								label="Add activity title"
+								placeholder="e.g., Senso-ji Temple"
+								value={newTitle}
+								onChange={(e) => setNewTitle(e.currentTarget.value)}
+							/>
+							<TextInput
+								label="Notes (optional)"
+								placeholder="e.g., best time to visit"
+								value={newNotes}
+								onChange={(e) => setNewNotes(e.currentTarget.value)}
+							/>
+							<Button onClick={handleAdd} loading={addLoading} fullWidth>
+								<Group gap={6} justify="center">
+									<IconPlus size={16} />
+									Add
+								</Group>
+							</Button>
+						</Stack>
+						<Group grow gap="xs" align="flex-end" mt="sm" visibleFrom="sm">
 							<TextInput
 								label="Add activity title"
 								placeholder="e.g., Senso-ji Temple"
